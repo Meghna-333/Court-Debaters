@@ -1,0 +1,1795 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Court Debaters — Constitutional Intelligence Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a0f1e;
+    --navy-mid: #111827;
+    --navy-light: #1a2540;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --gold-dim: #8a6e2e;
+    --white: #f5f0e8;
+    --white-dim: #c8c0b0;
+    --gray: #6b7280;
+    --red-accent: #8b1a1a;
+    --green-accent: #1a5c38;
+    --border: rgba(201,168,76,0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'Crimson Pro', Georgia, serif;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* ── NAVIGATION ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    padding: 1.2rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,15,30,0.92);
+    backdrop-filter: blur(16px);
+    transition: all 0.3s ease;
+  }
+
+  .nav-logo {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .nav-logo-main {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .nav-logo-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.55rem;
+    color: var(--gold);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--white-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+    position: relative;
+  }
+
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 0; right: 0;
+    height: 1px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+
+  .nav-links a:hover { color: var(--gold); }
+  .nav-links a:hover::after { transform: scaleX(1); }
+
+  .nav-cta {
+    background: var(--gold);
+    color: var(--navy) !important;
+    padding: 0.5rem 1.4rem;
+    font-weight: 500 !important;
+    letter-spacing: 0.1em;
+    transition: background 0.2s, transform 0.2s !important;
+  }
+
+  .nav-cta::after { display: none !important; }
+  .nav-cta:hover { background: var(--gold-light) !important; transform: translateY(-1px); }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 8rem 2rem 4rem;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 10% 80%, rgba(26,37,64,0.8) 0%, transparent 50%),
+      radial-gradient(ellipse 40% 40% at 90% 20%, rgba(139,26,26,0.04) 0%, transparent 50%);
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .hero-eyebrow::before, .hero-eyebrow::after {
+    content: '';
+    width: 40px;
+    height: 1px;
+    background: var(--gold-dim);
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.5rem, 9vw, 8rem);
+    font-weight: 900;
+    line-height: 0.92;
+    text-align: center;
+    letter-spacing: -0.02em;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.4s forwards;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-title .line-gold { color: var(--gold); }
+  .hero-title .line-italic { font-style: italic; font-weight: 400; }
+
+  .hero-sub {
+    font-family: 'Crimson Pro', serif;
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    font-weight: 300;
+    color: var(--white-dim);
+    text-align: center;
+    max-width: 640px;
+    margin: 2rem 0 3rem;
+    line-height: 1.7;
+    font-style: italic;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.6s forwards;
+  }
+
+  .hero-buttons {
+    display: flex;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.8s forwards;
+  }
+
+  .btn-primary {
+    background: var(--gold);
+    color: var(--navy);
+    padding: 0.9rem 2.4rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gold-light);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .btn-primary:hover::before { transform: translateX(0); }
+  .btn-primary span { position: relative; z-index: 1; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(201,168,76,0.3); }
+
+  .btn-ghost {
+    border: 1px solid var(--border);
+    color: var(--white-dim);
+    padding: 0.9rem 2.4rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.25s ease;
+  }
+
+  .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+  .hero-stats {
+    display: flex;
+    gap: 4rem;
+    margin-top: 5rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--border);
+    opacity: 0;
+    animation: fadeUp 0.9s 1s forwards;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--white-dim);
+    text-transform: uppercase;
+    margin-top: 0.4rem;
+  }
+
+  /* ── SCROLL INDICATOR ── */
+  .scroll-indicator {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.4;
+    animation: pulse 2s infinite;
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 50px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+  }
+
+  .scroll-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    position: relative;
+    z-index: 1;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 3rem;
+  }
+
+  .section-pad { padding: 8rem 0; }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .section-label::before {
+    content: '';
+    width: 30px;
+    height: 1px;
+    background: var(--gold-dim);
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-title em { font-style: italic; color: var(--gold); }
+
+  .section-body {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: var(--white-dim);
+    max-width: 680px;
+    font-weight: 300;
+  }
+
+  /* ── VISION SECTION ── */
+  #vision { background: var(--navy-mid); }
+
+  .vision-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2px;
+    margin-top: 4rem;
+  }
+
+  .vision-card {
+    background: var(--navy-light);
+    padding: 3rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    border-bottom: 3px solid transparent;
+  }
+
+  .vision-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+
+  .vision-card:hover { border-bottom-color: var(--gold); transform: translateY(-4px); }
+  .vision-card:hover::before { opacity: 1; }
+
+  .vision-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem;
+    font-weight: 900;
+    color: rgba(201,168,76,0.08);
+    line-height: 1;
+    margin-bottom: 1.5rem;
+    position: absolute;
+    top: 1.5rem;
+    right: 2rem;
+  }
+
+  .vision-icon {
+    width: 48px;
+    height: 48px;
+    border: 1px solid var(--gold-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+  }
+
+  .vision-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.3;
+  }
+
+  .vision-card p {
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--white-dim);
+    font-weight: 300;
+  }
+
+  .vision-badge {
+    display: inline-block;
+    margin-top: 1.5rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    border: 1px solid var(--gold-dim);
+    padding: 0.3rem 0.8rem;
+  }
+
+  /* ── PROBLEM SECTION ── */
+  #problem {
+    background: var(--navy);
+    border-top: 1px solid var(--border);
+  }
+
+  .problem-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: start;
+  }
+
+  .problem-list {
+    margin-top: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .problem-item {
+    padding: 2rem 0;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+    transition: all 0.3s;
+    cursor: default;
+  }
+
+  .problem-item:hover { padding-left: 0.5rem; }
+
+  .problem-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    padding-top: 0.3rem;
+  }
+
+  .problem-item h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .problem-item p {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--white-dim);
+    font-weight: 300;
+  }
+
+  .problem-visual {
+    position: sticky;
+    top: 8rem;
+  }
+
+  .big-number {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(5rem, 12vw, 9rem);
+    font-weight: 900;
+    color: rgba(201,168,76,0.12);
+    line-height: 0.9;
+    margin-bottom: 1rem;
+  }
+
+  .big-number-label {
+    font-family: 'Crimson Pro', serif;
+    font-size: 1.4rem;
+    font-style: italic;
+    color: var(--white-dim);
+    line-height: 1.5;
+    margin-bottom: 2rem;
+  }
+
+  .stat-row {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .stat-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .stat-bar-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--white-dim);
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .stat-bar-track {
+    height: 3px;
+    background: rgba(255,255,255,0.08);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+    animation: fillBar 2s 0.5s both;
+    transform-origin: left;
+  }
+
+  /* ── PILLARS ── */
+  #pillars { background: var(--navy-mid); }
+
+  .pillars-header {
+    text-align: center;
+    margin-bottom: 5rem;
+  }
+
+  .pillars-header .section-label { justify-content: center; }
+  .pillars-header .section-label::before { display: none; }
+
+  .pillars-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .pillar {
+    background: var(--navy-mid);
+    padding: 2.8rem 2.4rem;
+    transition: background 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pillar::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+  }
+
+  .pillar:hover { background: var(--navy-light); }
+  .pillar:hover::after { transform: scaleX(1); }
+
+  .pillar-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--gold);
+    letter-spacing: 0.2em;
+    margin-bottom: 1.5rem;
+  }
+
+  .pillar h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.3;
+  }
+
+  .pillar p {
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: var(--white-dim);
+    font-weight: 300;
+  }
+
+  /* ── DIVISIONS ── */
+  #divisions { background: var(--navy); }
+
+  .divisions-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2rem;
+    margin-top: 4rem;
+  }
+
+  .division-card {
+    border: 1px solid var(--border);
+    padding: 3rem 2.5rem;
+    position: relative;
+    transition: all 0.4s;
+    overflow: hidden;
+  }
+
+  .division-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(201,168,76,0.04), transparent);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+
+  .division-card:hover { border-color: var(--gold); transform: translateY(-6px); }
+  .division-card:hover::before { opacity: 1; }
+
+  .division-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .division-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .division-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: block;
+  }
+
+  .division-card p {
+    font-size: 0.98rem;
+    line-height: 1.75;
+    color: var(--white-dim);
+    font-weight: 300;
+    margin-bottom: 2rem;
+  }
+
+  .division-features {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .division-feature {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--white-dim);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .division-feature::before {
+    content: '→';
+    color: var(--gold);
+    font-size: 0.7rem;
+  }
+
+  /* ── EVOLUTION ROADMAP ── */
+  #roadmap {
+    background: var(--navy-mid);
+    border-top: 1px solid var(--border);
+  }
+
+  .roadmap-layout {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 6rem;
+    align-items: start;
+  }
+
+  .roadmap-left {
+    position: sticky;
+    top: 8rem;
+  }
+
+  .roadmap-quote {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--white-dim);
+    border-left: 3px solid var(--gold);
+    padding-left: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .phases {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 3rem;
+  }
+
+  .phase {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 2rem;
+    padding: 2.5rem 0;
+    border-bottom: 1px solid var(--border);
+    align-items: start;
+    position: relative;
+  }
+
+  .phase:last-child { border-bottom: none; }
+
+  .phase-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .phase-circle {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--gold-dim);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--gold);
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+
+  .phase:hover .phase-circle {
+    background: var(--gold);
+    color: var(--navy);
+    border-color: var(--gold);
+  }
+
+  .phase-content h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+
+  .phase-timeline {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.7rem;
+  }
+
+  .phase-content p {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--white-dim);
+    font-weight: 300;
+  }
+
+  .phase-vision {
+    margin-top: 0.7rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--green-accent);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .phase-vision::before {
+    content: '✦';
+    color: var(--gold);
+  }
+
+  /* ── UNDERSERVED ── */
+  #underserved { background: var(--navy); }
+
+  .underserved-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--border);
+    margin-top: 4rem;
+    border: 1px solid var(--border);
+  }
+
+  .underserved-card {
+    background: var(--navy);
+    padding: 3.5rem 3rem;
+    transition: background 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .underserved-card:hover { background: var(--navy-light); }
+
+  .underserved-accent {
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--gold-dim);
+    transition: background 0.3s, width 0.3s;
+  }
+
+  .underserved-card:hover .underserved-accent {
+    background: var(--gold);
+    width: 5px;
+  }
+
+  .underserved-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .underserved-card p {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--white-dim);
+    font-weight: 300;
+  }
+
+  /* ── COMPARISON ── */
+  #compare { background: var(--navy-mid); border-top: 1px solid var(--border); }
+
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 3rem;
+    font-size: 0.9rem;
+  }
+
+  .compare-table th {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--gold-dim);
+    text-align: left;
+    color: var(--white-dim);
+  }
+
+  .compare-table th:last-child {
+    color: var(--gold);
+    background: rgba(201,168,76,0.06);
+  }
+
+  .compare-table td {
+    padding: 0.9rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-family: 'Crimson Pro', serif;
+    font-size: 0.95rem;
+    color: var(--white-dim);
+    transition: background 0.2s;
+  }
+
+  .compare-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .compare-table td:last-child {
+    background: rgba(201,168,76,0.04);
+    color: #4ade80;
+    font-weight: 600;
+  }
+
+  .no { color: #ef4444 !important; font-weight: 400 !important; }
+  .partial { color: #f59e0b !important; }
+
+  /* ── NORTH STAR ── */
+  #northstar {
+    background: linear-gradient(135deg, var(--navy-light) 0%, var(--navy) 100%);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+    padding: 8rem 2rem;
+  }
+
+  .northstar-quote {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.6rem, 4vw, 2.8rem);
+    font-style: italic;
+    font-weight: 400;
+    max-width: 900px;
+    margin: 0 auto 2rem;
+    line-height: 1.4;
+    color: var(--white);
+    position: relative;
+    padding: 0 3rem;
+  }
+
+  .northstar-quote::before, .northstar-quote::after {
+    content: '"';
+    font-size: 6rem;
+    color: rgba(201,168,76,0.15);
+    position: absolute;
+    font-style: normal;
+    line-height: 1;
+  }
+
+  .northstar-quote::before { top: -1rem; left: 0; }
+  .northstar-quote::after { bottom: -3rem; right: 0; content: '"'; }
+
+  .northstar-attr {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-top: 3rem;
+  }
+
+  /* ── BUSINESS MODEL ── */
+  #business { background: var(--navy); }
+
+  .biz-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 4rem;
+  }
+
+  .biz-card {
+    border: 1px solid var(--border);
+    padding: 2.5rem 2rem;
+    position: relative;
+    transition: all 0.3s;
+  }
+
+  .biz-card:hover { border-color: var(--gold-dim); background: var(--navy-light); }
+
+  .biz-card h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+  }
+
+  .biz-card p {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--white-dim);
+    font-weight: 300;
+  }
+
+  .biz-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  /* ── 30-DAY PLAN ── */
+  #plan { background: var(--navy-mid); }
+
+  .weeks-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    margin-top: 4rem;
+    border: 1px solid var(--border);
+  }
+
+  .week-card {
+    background: var(--navy-mid);
+    padding: 2.5rem 2rem;
+    transition: background 0.3s;
+  }
+
+  .week-card:hover { background: var(--navy-light); }
+
+  .week-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+
+  .week-days {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.9rem;
+    color: var(--white-dim);
+    margin-bottom: 1.5rem;
+    font-style: italic;
+  }
+
+  .week-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+  }
+
+  .week-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .week-item {
+    font-size: 0.85rem;
+    color: var(--white-dim);
+    padding-left: 1rem;
+    position: relative;
+    line-height: 1.5;
+    font-weight: 300;
+  }
+
+  .week-item::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--gold-dim);
+    font-size: 0.7rem;
+  }
+
+  /* ── CTA ── */
+  #cta {
+    background: var(--navy);
+    padding: 10rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #cta::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(201,168,76,0.06) 0%, transparent 70%);
+  }
+
+  .cta-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 900;
+    line-height: 1.05;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cta-title em { font-style: italic; color: var(--gold); }
+
+  .cta-sub {
+    font-size: 1.2rem;
+    color: var(--white-dim);
+    font-weight: 300;
+    font-style: italic;
+    margin-bottom: 3rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cta-url {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.3em;
+    color: var(--gold-dim);
+    margin-top: 3rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: #050810;
+    padding: 3rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: gap;
+  }
+
+  .footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--white-dim);
+  }
+
+  .footer-copy {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--gray);
+    text-transform: uppercase;
+  }
+
+  .footer-tagline {
+    font-family: 'Crimson Pro', serif;
+    font-size: 0.9rem;
+    font-style: italic;
+    color: var(--gold-dim);
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+  }
+
+  @keyframes fillBar {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    .container { padding: 0 1.5rem; }
+    .vision-grid, .pillars-grid, .divisions-layout, .underserved-grid, .biz-grid, .weeks-grid { grid-template-columns: 1fr; }
+    .problem-layout, .roadmap-layout { grid-template-columns: 1fr; gap: 3rem; }
+    .problem-visual, .roadmap-left { position: static; }
+    footer { flex-direction: column; gap: 1rem; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-main">Court Debaters</div>
+    <div class="nav-logo-sub">Constitutional Intelligence</div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#vision">Vision</a></li>
+    <li><a href="#pillars">Platform</a></li>
+    <li><a href="#divisions">Divisions</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#underserved">Mission</a></li>
+    <li><a href="#cta" class="nav-cta">Get Early Access</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+
+  <div class="hero-eyebrow">Constitutional Intelligence Platform</div>
+
+  <h1 class="hero-title">
+    <div>Court</div>
+    <div class="line-gold line-italic">Debaters</div>
+  </h1>
+
+  <p class="hero-sub">
+    India's first AI-powered constitutional intelligence system — built to make strategic legal thinking accessible to every lawyer, every student, and every person seeking justice.
+  </p>
+
+  <div class="hero-buttons">
+    <a href="#vision" class="btn-primary"><span>Explore the Vision</span></a>
+    <a href="#cta" class="btn-ghost">Get Early Access</a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">50M+</div>
+      <div class="stat-label">Pending Cases in India</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">CI</div>
+      <div class="stat-label">Constitutional Intelligence</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">3</div>
+      <div class="stat-label">Practice Divisions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">5</div>
+      <div class="stat-label">Evolution Phases</div>
+    </div>
+  </div>
+
+  <div class="scroll-indicator">
+    <div class="scroll-line"></div>
+    <div class="scroll-text">Scroll</div>
+  </div>
+</section>
+
+<!-- FOUNDER VISION -->
+<section id="vision" class="section-pad">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Founding Vision</div>
+      <h2 class="section-title">What Nobody Else<br>Is <em>Building</em></h2>
+      <p class="section-body">Court Debaters is not another legal tool. It is a civilizational project built on three founding visions that no competitor has imagined — let alone pursued.</p>
+    </div>
+
+    <div class="vision-grid" style="margin-top:4rem;">
+      <div class="vision-card reveal reveal-delay-1">
+        <div class="vision-num">01</div>
+        <div class="vision-icon">⚖️</div>
+        <h3>The AI That Grows Into a Real Lawyer</h3>
+        <p>Court Debaters begins as a legal co-pilot. But unlike every other legal AI tool, it is architectured to evolve — phase by phase, earning trust until it becomes a standalone AI lawyer capable of handling cases independently for those who cannot access human counsel.</p>
+        <div class="vision-badge">Phase 1 → Phase 2 Evolution</div>
+      </div>
+      <div class="vision-card reveal reveal-delay-2">
+        <div class="vision-num">02</div>
+        <div class="vision-icon">🤖</div>
+        <h3>The Constitutional Brain for Humanoid Robots</h3>
+        <p>No legal tech company in the world is working on this. Court Debaters is designed to become the constitutional operating system that governs the legal behavior of future humanoid robots and AI-driven legal entities. The legal intelligence of tomorrow's world.</p>
+        <div class="vision-badge">Phase 4 — Global Infrastructure</div>
+      </div>
+      <div class="vision-card reveal reveal-delay-3">
+        <div class="vision-num">03</div>
+        <div class="vision-icon">🏛️</div>
+        <h3>Democratizing Justice for Those Left Behind</h3>
+        <p>Millions of Indians face injustice they cannot afford to fight. Court Debaters exists first for them — making constitutional intelligence affordable enough that geography, income, and social status are no longer barriers between a person and their rights.</p>
+        <div class="vision-badge">Core Mission — Justice for All</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THE PROBLEM -->
+<section id="problem" class="section-pad">
+  <div class="container">
+    <div class="problem-layout">
+      <div>
+        <div class="reveal">
+          <div class="section-label">The Problem</div>
+          <h2 class="section-title">A System That<br><em>Fails</em> Its People</h2>
+          <p class="section-body">India's legal ecosystem is broken in four structural ways that have persisted for decades. Court Debaters was engineered to solve each one.</p>
+        </div>
+
+        <div class="problem-list">
+          <div class="problem-item reveal">
+            <div class="problem-num">01 —</div>
+            <div>
+              <h4>50 Million Pending Cases</h4>
+              <p>India's courts are collapsing under case overload. Lawyers drown in repetitive research and document preparation, leaving the most vulnerable to wait years for resolution.</p>
+            </div>
+          </div>
+          <div class="problem-item reveal">
+            <div class="problem-num">02 —</div>
+            <div>
+              <h4>Justice as a Privilege</h4>
+              <p>Quality legal representation is beyond the financial reach of millions. Farmers lose land. Workers lose rights. Families lose protection — simply because they cannot pay.</p>
+            </div>
+          </div>
+          <div class="problem-item reveal">
+            <div class="problem-num">03 —</div>
+            <div>
+              <h4>No Strategic Training for Students</h4>
+              <p>India's law schools teach doctrine but not strategy. The constitutional, argumentative depth that separates great lawyers from average ones takes decades. Court Debaters closes this gap from day one.</p>
+            </div>
+          </div>
+          <div class="problem-item reveal">
+            <div class="problem-num">04 —</div>
+            <div>
+              <h4>No Constitutional Intelligence Exists</h4>
+              <p>Existing platforms — Manupatra, SCC Online — are libraries. They store information. None of them reason constitutionally, simulate strategy, or tell a lawyer where their argument is weak. This gap is enormous. And entirely unoccupied.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="problem-visual reveal">
+        <div class="big-number">50M</div>
+        <div class="big-number-label">pending cases in India's courts — and growing every year</div>
+        <div class="stat-row">
+          <div class="stat-bar">
+            <div class="stat-bar-label"><span>Case Backlog Severity</span><span>94%</span></div>
+            <div class="stat-bar-track"><div class="stat-bar-fill" style="width:94%"></div></div>
+          </div>
+          <div class="stat-bar">
+            <div class="stat-bar-label"><span>Legal Access Gap</span><span>78%</span></div>
+            <div class="stat-bar-track"><div class="stat-bar-fill" style="width:78%"></div></div>
+          </div>
+          <div class="stat-bar">
+            <div class="stat-bar-label"><span>Constitutional Tools Available</span><span>4%</span></div>
+            <div class="stat-bar-track"><div class="stat-bar-fill" style="width:4%"></div></div>
+          </div>
+          <div class="stat-bar">
+            <div class="stat-bar-label"><span>Strategic Training for Students</span><span>12%</span></div>
+            <div class="stat-bar-track"><div class="stat-bar-fill" style="width:12%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SIX PILLARS -->
+<section id="pillars" class="section-pad">
+  <div class="container">
+    <div class="pillars-header reveal">
+      <div class="section-label">The Platform</div>
+      <h2 class="section-title">Six Intelligence <em>Pillars</em></h2>
+      <p class="section-body" style="margin:0 auto; text-align:center;">Every pillar addresses a specific gap in the legal ecosystem. Together, they create a platform no competitor offers.</p>
+    </div>
+
+    <div class="pillars-grid">
+      <div class="pillar reveal reveal-delay-1">
+        <div class="pillar-num">Pillar 01</div>
+        <h3>Constitutional Intelligence Engine</h3>
+        <p>Trained on the Indian Constitution, all amendments, Supreme Court judgments, IPC, and CPC. Identifies constitutional vulnerabilities, maps precedents, and applies multiple judicial interpretation frameworks automatically.</p>
+      </div>
+      <div class="pillar reveal reveal-delay-2">
+        <div class="pillar-num">Pillar 02</div>
+        <h3>AI Case Analysis & Petition Drafting</h3>
+        <p>Input case facts. Get back a full structured analysis: key legal issues, relevant statutes, constitutional angles, risks, and a draft petition structure tailored to the relevant Indian court — in minutes, not days.</p>
+      </div>
+      <div class="pillar reveal reveal-delay-3">
+        <div class="pillar-num">Pillar 03</div>
+        <h3>Strategic Argument Simulator (Chess Mode)</h3>
+        <p>Inspired by chess strategy systems. Lawyers build entire case strategies before entering court — scoring arguments on constitutional grounding, rhetorical effectiveness, and resilience under cross-examination pressure.</p>
+      </div>
+      <div class="pillar reveal reveal-delay-1">
+        <div class="pillar-num">Pillar 04</div>
+        <h3>Mock Court & Cross-Examination Simulator</h3>
+        <p>A full simulated courtroom where AI plays opposing counsel, judge, or hostile witness. Arguments are challenged in real time. Cross-examination lines are scored for logical progression and constitutional soundness.</p>
+      </div>
+      <div class="pillar reveal reveal-delay-2">
+        <div class="pillar-num">Pillar 05</div>
+        <h3>Logical Fallacy Detection & Argument Psychology</h3>
+        <p>Every argument scanned for embedded logical fallacies. Beyond detection: the platform analyzes psychological architecture — emotional triggers, cognitive biases, credibility signals, and persuasion levers in legal language.</p>
+      </div>
+      <div class="pillar reveal reveal-delay-3">
+        <div class="pillar-num">Pillar 06</div>
+        <h3>Gamified Legal Intelligence Training</h3>
+        <p>Constitutional skill-building made competitive and habit-forming. Points, leaderboards, ranked debate challenges, and achievement badges create the training ground for India's next generation of constitutional leaders.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THREE DIVISIONS -->
+<section id="divisions" class="section-pad">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Practice Divisions</div>
+      <h2 class="section-title">Three Divisions.<br>One <em>Platform</em>.</h2>
+      <p class="section-body">Organized by practice area for depth and precision. Every division speaks the language of the lawyers who use it.</p>
+    </div>
+
+    <div class="divisions-layout">
+      <div class="division-card reveal reveal-delay-1">
+        <div class="division-icon">📋</div>
+        <h3>Civil Law</h3>
+        <span class="division-tag">Launch Division</span>
+        <p>The fastest path to demonstrated value. Property disputes, contract law, family law, consumer protection, and civil procedure — high-volume, repeatable patterns where AI adds immediate impact.</p>
+        <div class="division-features">
+          <div class="division-feature">Civil petition drafting AI</div>
+          <div class="division-feature">Constitutional rights mapping</div>
+          <div class="division-feature">Precedent analysis engine</div>
+          <div class="division-feature">Dispute resolution strategy</div>
+        </div>
+      </div>
+      <div class="division-card reveal reveal-delay-2">
+        <div class="division-icon">⚖️</div>
+        <h3>Criminal Law</h3>
+        <span class="division-tag">High-Stakes Division</span>
+        <p>The deepest intelligence layer. Complete case investigation files assembled into a full constitutional intelligence profile — psychological analysis, precedent mapping, and strategic defense frameworks.</p>
+        <div class="division-features">
+          <div class="division-feature">Full investigation analysis</div>
+          <div class="division-feature">Accused constitutional rights</div>
+          <div class="division-feature">Behavioral & psychological profiling</div>
+          <div class="division-feature">Defense strategy simulation</div>
+        </div>
+      </div>
+      <div class="division-card reveal reveal-delay-3">
+        <div class="division-icon">🏢</div>
+        <h3>Corporate & Company Law</h3>
+        <span class="division-tag">SMB & Enterprise Division</span>
+        <p>For thousands of Indian businesses that cannot afford full legal retainers. Statutory compliance, contract analysis, constitutional risk assessment, and access to premium advocates when needed.</p>
+        <div class="division-features">
+          <div class="division-feature">Statutory compliance monitoring</div>
+          <div class="division-feature">Contract risk analysis</div>
+          <div class="division-feature">Corporate constitutional intelligence</div>
+          <div class="division-feature">Premium advocate marketplace</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EVOLUTION ROADMAP -->
+<section id="roadmap" class="section-pad">
+  <div class="container">
+    <div class="roadmap-layout">
+      <div class="roadmap-left reveal">
+        <div class="section-label">Evolution Roadmap</div>
+        <h2 class="section-title">From Tool<br>to <em>Institution</em></h2>
+        <p class="section-body">No competitor has designed themselves to evolve this way. Every phase builds on the last — earning trust, accumulating constitutional intelligence, expanding what justice means.</p>
+        <div class="roadmap-quote">
+          "Tools solve today's problems. Institutions shape tomorrow's world."
+        </div>
+      </div>
+
+      <div>
+        <div class="phases">
+          <div class="phase reveal">
+            <div class="phase-connector">
+              <div class="phase-circle">01</div>
+            </div>
+            <div class="phase-content">
+              <div class="phase-timeline">Month 1 – 6</div>
+              <h4>AI Legal Co-Pilot for Lawyers</h4>
+              <p>Court Debaters launches as the most intelligent legal assistant in India — earning trust through accurate constitutional analysis, fast petition drafting, and strategic simulation.</p>
+              <div class="phase-vision">Helping hand that earns lawyer trust</div>
+            </div>
+          </div>
+          <div class="phase reveal">
+            <div class="phase-connector">
+              <div class="phase-circle">02</div>
+            </div>
+            <div class="phase-content">
+              <div class="phase-timeline">Month 6 – 18</div>
+              <h4>Standalone AI Lawyer for All Indians</h4>
+              <p>Once it proves its constitutional reasoning, Court Debaters begins serving clients directly — particularly those who cannot afford human representation. The AI lawyer with the reach of a national firm.</p>
+              <div class="phase-vision">Justice without financial barriers</div>
+            </div>
+          </div>
+          <div class="phase reveal">
+            <div class="phase-connector">
+              <div class="phase-circle">03</div>
+            </div>
+            <div class="phase-content">
+              <div class="phase-timeline">Year 2 – 3</div>
+              <h4>Legal AI Standard Across Indian Courts</h4>
+              <p>Recognition from the Bar Council of India and Supreme Court as a certified constitutional intelligence system. The platform every Indian lawyer builds their case strategy on.</p>
+              <div class="phase-vision">Institutional recognition — North Star Goal</div>
+            </div>
+          </div>
+          <div class="phase reveal">
+            <div class="phase-connector">
+              <div class="phase-circle">04</div>
+            </div>
+            <div class="phase-content">
+              <div class="phase-timeline">Year 4 – 7</div>
+              <h4>Constitutional OS for AI Legal Entities</h4>
+              <p>Court Debaters becomes the constitutional operating system for future AI-driven legal entities and humanoid robots — the governing intelligence layer for the next generation of legal technology.</p>
+              <div class="phase-vision">The brain governing humanoid legal robots</div>
+            </div>
+          </div>
+          <div class="phase reveal">
+            <div class="phase-connector">
+              <div class="phase-circle">05</div>
+            </div>
+            <div class="phase-content">
+              <div class="phase-timeline">Year 7+</div>
+              <h4>Global Constitutional Intelligence Platform</h4>
+              <p>From India to the world. Court Debaters' constitutional reasoning engine becomes the global standard — influencing international constitutional law, cross-border legal intelligence, and the legal future of humanity.</p>
+              <div class="phase-vision">World's constitutional intelligence infrastructure</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- UNDERSERVED -->
+<section id="underserved" class="section-pad">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Our Mission</div>
+      <h2 class="section-title">Built for Those<br><em>Left Behind</em></h2>
+      <p class="section-body">Every feature on Court Debaters is filtered through one question: does this serve the people who need it most? These four groups are at the heart of our purpose.</p>
+    </div>
+
+    <div class="underserved-grid">
+      <div class="underserved-card reveal reveal-delay-1">
+        <div class="underserved-accent"></div>
+        <h3>Poor Individuals Denied Justice</h3>
+        <p>Millions of Indians face legal battles they cannot afford to fight. A farmer losing land. A worker denied rights. A family silenced in court. Court Debaters offers constitutional intelligence at a fraction of the cost of a lawyer — and in Phase 2, a full AI representative that fights for their rights without premium fees.</p>
+      </div>
+      <div class="underserved-card reveal reveal-delay-2">
+        <div class="underserved-accent"></div>
+        <h3>Law Students Without Strategic Depth</h3>
+        <p>India's law schools teach doctrine. Rarely strategy. Court Debaters closes this gap — transforming technically competent graduates into strategically sophisticated constitutional thinkers before they enter their first courtroom. The training ground for India's next legal leaders.</p>
+      </div>
+      <div class="underserved-card reveal reveal-delay-3">
+        <div class="underserved-accent"></div>
+        <h3>Rural Communities Without Access</h3>
+        <p>In hundreds of thousands of Indian villages, there is no lawyer available — no one who speaks the local language or can be afforded. These communities have constitutional rights they cannot enforce. Court Debaters is being built to reach them, with vernacular language support and offline-capable features.</p>
+      </div>
+      <div class="underserved-card reveal reveal-delay-4">
+        <div class="underserved-accent"></div>
+        <h3>Small Businesses Trapped in Disputes</h3>
+        <p>Indian SMBs spend enormous time and money on legal complexity that large corporations handle with dedicated teams. Most cannot afford a legal retainer. Court Debaters' Corporate Division gives small businesses direct access to the same constitutional intelligence — levelling the playing field entirely.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section id="compare" class="section-pad">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Competitive Landscape</div>
+      <h2 class="section-title">What Nobody Else<br>Is <em>Doing</em></h2>
+      <p class="section-body">These are not incremental improvements. These are entirely unoccupied spaces in legal technology — spaces identified by asking what justice actually requires.</p>
+    </div>
+
+    <div class="reveal" style="overflow-x:auto; margin-top:1rem;">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Unique Capability</th>
+            <th>Manupatra</th>
+            <th>SCC Online</th>
+            <th>General AI</th>
+            <th>Court Debaters</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Constitutional Intelligence Engine</td><td class="no">✗ No</td><td class="no">✗ No</td><td class="partial">~ Partial</td><td>✓ Yes</td></tr>
+          <tr><td>AI that evolves into a real lawyer</td><td class="no">✗ No</td><td class="no">✗ No</td><td class="no">✗ No</td><td>✓ Yes — Phase 2</td></tr>
+          <tr><td>Constitutional brain for humanoid robots</td><td class="no">✗ No</td><td class="no">✗ No</td><td class="no">✗ No</td><td>✓ Yes — Phase 4</td></tr>
+          <tr><td>Chess-style legal strategy engine</td><td class="no">✗ No</td><td class="no">✗ No</td><td class="no">✗ No</td><td>✓ Yes</td></tr>
+          <tr><td>Mock court & cross-examination simulation</td><td class="no">✗ No</td><td class="no">✗ No</td><td class="no">✗ No</td><td>✓ Yes</td></tr>
+          <tr><td>Logical fallacy detection in arguments</td><td class="no">✗ No</td><td class="no">✗ No</td><td class="no">✗ No</td><td>✓ Yes</td></tr>
+          <tr><td>Argument psychology analysis</td><td class="no">✗ No</td><td class="no">✗ No</td><td class="no">✗ No</td><td>✓ Yes</td></tr>
+          <tr><td>Petition drafting AI for Indian courts</td><td class="no">✗ No</td><td class="no">✗ No</td><td class="partial">~ Partial</td><td>✓ Yes</td></tr>
+          <tr><td>Justice-first accessible pricing</td><td class="no">✗ No</td><td class="no">✗ No</td><td class="partial">~ Partial</td><td>✓ Yes</td></tr>
+          <tr><td>Gamified training — student to advocate</td><td class="no">✗ No</td><td class="no">✗ No</td><td class="no">✗ No</td><td>✓ Yes</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- NORTH STAR QUOTE -->
+<section id="northstar">
+  <div class="northstar-quote reveal">
+    The goal is not to be a tool lawyers use. The goal is to be the intelligence layer the Indian legal system cannot function without.
+  </div>
+  <div class="northstar-attr reveal">— Founding Philosophy of Court Debaters</div>
+</section>
+
+<!-- BUSINESS MODEL -->
+<section id="business" class="section-pad">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Business Model</div>
+      <h2 class="section-title">Justice-First<br><em>Economics</em></h2>
+      <p class="section-body">Revenue is structured so those who can pay most, subsidize access for those who cannot. Commercial sustainability and social mission, unified.</p>
+    </div>
+
+    <div class="biz-grid">
+      <div class="biz-card reveal reveal-delay-1">
+        <div class="biz-tag">Individual</div>
+        <h4>Lawyer Subscription</h4>
+        <p>Monthly and annual access for advocates. Full constitutional intelligence, case analysis, petition drafting, and mock court simulation.</p>
+      </div>
+      <div class="biz-card reveal reveal-delay-2">
+        <div class="biz-tag">Enterprise</div>
+        <h4>Law Firm License</h4>
+        <p>Bulk access for entire legal teams with dedicated support, analytics, and custom constitutional knowledge base configuration.</p>
+      </div>
+      <div class="biz-card reveal reveal-delay-3">
+        <div class="biz-tag">Corporate</div>
+        <h4>SMB Legal Package</h4>
+        <p>Compliance monitoring, contract intelligence, and constitutional risk tools for small and medium businesses without legal retainers.</p>
+      </div>
+      <div class="biz-card reveal reveal-delay-1">
+        <div class="biz-tag">Education</div>
+        <h4>Student & Academic Plan</h4>
+        <p>Affordable tier with full gamified training system for law students and institutions. The pipeline for India's next legal generation.</p>
+      </div>
+      <div class="biz-card reveal reveal-delay-2">
+        <div class="biz-tag">Premium</div>
+        <h4>Advocate Marketplace</h4>
+        <p>Individuals and companies connect directly with verified senior advocates through the platform. Court Debaters earns a placement fee.</p>
+      </div>
+      <div class="biz-card reveal reveal-delay-3">
+        <div class="biz-tag">Infrastructure</div>
+        <h4>Constitutional API</h4>
+        <p>License Court Debaters' constitutional intelligence engine to third-party legal platforms, institutions, and government bodies.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 30-DAY PLAN -->
+<section id="plan" class="section-pad">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">30-Day Blueprint</div>
+      <h2 class="section-title">From Zero to<br><em>Launched</em> — This Month</h2>
+      <p class="section-body">A focused, week-by-week execution framework. Every day builds toward one goal: getting the MVP in front of real Indian lawyers.</p>
+    </div>
+
+    <div class="weeks-grid">
+      <div class="week-card reveal reveal-delay-1">
+        <div class="week-label">Week 1</div>
+        <div class="week-days">Days 1 – 7</div>
+        <div class="week-title">Foundation</div>
+        <div class="week-items">
+          <div class="week-item">Register CourtDebaters.com today</div>
+          <div class="week-item">Write founding vision document</div>
+          <div class="week-item">Interview 5 Indian advocates</div>
+          <div class="week-item">Study Indian Constitution & CPC</div>
+          <div class="week-item">Research Claude API & RAG architecture</div>
+          <div class="week-item">Find technical co-founder</div>
+        </div>
+      </div>
+      <div class="week-card reveal reveal-delay-2">
+        <div class="week-label">Week 2</div>
+        <div class="week-days">Days 8 – 14</div>
+        <div class="week-title">Architecture</div>
+        <div class="week-items">
+          <div class="week-item">Design platform information architecture</div>
+          <div class="week-item">Build constitutional knowledge base</div>
+          <div class="week-item">Choose tech stack</div>
+          <div class="week-item">Create user journey wireframes</div>
+          <div class="week-item">Develop initial AI prompt architecture</div>
+          <div class="week-item">Launch CourtDebaters.com landing page</div>
+        </div>
+      </div>
+      <div class="week-card reveal reveal-delay-3">
+        <div class="week-label">Week 3</div>
+        <div class="week-days">Days 15 – 21</div>
+        <div class="week-title">Build MVP</div>
+        <div class="week-items">
+          <div class="week-item">Build case input interface</div>
+          <div class="week-item">Connect AI to legal knowledge base (RAG)</div>
+          <div class="week-item">Build constitutional analysis output</div>
+          <div class="week-item">Build petition drafting assistant</div>
+          <div class="week-item">Test with 5 real civil law cases</div>
+          <div class="week-item">Basic mock court interface</div>
+        </div>
+      </div>
+      <div class="week-card reveal reveal-delay-4">
+        <div class="week-label">Week 4</div>
+        <div class="week-days">Days 22 – 30</div>
+        <div class="week-title">Launch</div>
+        <div class="week-items">
+          <div class="week-item">Beta test with 10 real lawyers</div>
+          <div class="week-item">Refine AI outputs from feedback</div>
+          <div class="week-item">Set up Razorpay payments</div>
+          <div class="week-item">Add gamification layer</div>
+          <div class="week-item">Public launch & bar association outreach</div>
+          <div class="week-item">Begin collecting case intelligence data</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="reveal">
+    <h2 class="cta-title">Justice Should Not<br>Depend on How Much<br>You Can <em>Pay</em>.</h2>
+    <p class="cta-sub">Court Debaters is being built to change that. Be part of it from day one.</p>
+    <div class="hero-buttons" style="opacity:1; animation:none;">
+      <a href="mailto:hello@courtdebaters.com" class="btn-primary"><span>Get Early Access</span></a>
+      <a href="#vision" class="btn-ghost">Read the Vision</a>
+    </div>
+    <div class="cta-url">www.CourtDebaters.com</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Court Debaters</div>
+  <div class="footer-tagline">Constitutional Intelligence. Strategic Justice. Global Impact.</div>
+  <div class="footer-copy">© 2025 CourtDebaters.com — All rights reserved</div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+
+  reveals.forEach(el => observer.observe(el));
+
+  // Nav scroll effect
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav');
+    if (window.scrollY > 80) {
+      nav.style.padding = '0.8rem 3rem';
+      nav.style.borderBottomColor = 'rgba(201,168,76,0.15)';
+    } else {
+      nav.style.padding = '1.2rem 3rem';
+      nav.style.borderBottomColor = 'rgba(201,168,76,0.2)';
+    }
+  });
+
+  // Animated counters on hero stats
+  const animateCount = (el, target, suffix = '') => {
+    let current = 0;
+    const step = target / 60;
+    const timer = setInterval(() => {
+      current += step;
+      if (current >= target) {
+        el.textContent = target + suffix;
+        clearInterval(timer);
+      } else {
+        el.textContent = Math.floor(current) + suffix;
+      }
+    }, 16);
+  };
+</script>
+</body>
+</html>

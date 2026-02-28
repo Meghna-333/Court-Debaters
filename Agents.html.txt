@@ -1,0 +1,1244 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Court Debaters — AI Agents Command Centre</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:       #07090f;
+  --navy-mid:   #0d1221;
+  --navy-card:  #111827;
+  --navy-input: #0f1623;
+  --gold:       #c9a84c;
+  --gold-light: #e8c97a;
+  --gold-dim:   #7a6228;
+  --gold-glow:  rgba(201,168,76,0.15);
+  --white:      #f0ebe0;
+  --white-dim:  #9a9080;
+  --border:     rgba(201,168,76,0.18);
+  --border-dim: rgba(255,255,255,0.06);
+  --green:      #22c55e;
+  --red:        #ef4444;
+  --blue:       #60a5fa;
+
+  --agent-ci:   #c9a84c;  /* Constitutional Intelligence */
+  --agent-ca:   #818cf8;  /* Case Analysis */
+  --agent-st:   #34d399;  /* Strategy */
+  --agent-mc:   #f87171;  /* Mock Court */
+  --agent-lf:   #fb923c;  /* Fallacy Detector */
+  --agent-pd:   #a78bfa;  /* Petition Drafter */
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+
+body {
+  background: var(--navy);
+  color: var(--white);
+  font-family: 'Crimson Pro', Georgia, serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* grain overlay */
+body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  opacity: 0.5;
+}
+
+/* ══ NAV ══════════════════════════════════════════════════ */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:1000;
+  padding: 1rem 2.5rem;
+  display: flex; align-items:center; justify-content:space-between;
+  background: rgba(7,9,15,0.95);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+}
+.nav-brand { display:flex; flex-direction:column; gap:0; text-decoration:none; }
+.nav-brand-name { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color:var(--white); letter-spacing:0.06em; }
+.nav-brand-sub  { font-family:'DM Mono',monospace; font-size:0.5rem; color:var(--gold); letter-spacing:0.3em; text-transform:uppercase; }
+.nav-center {
+  display:flex; gap:0.4rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-dim);
+  padding: 0.3rem;
+}
+.nav-tab {
+  font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:0.12em;
+  text-transform:uppercase; padding:0.4rem 1rem; color:var(--white-dim);
+  text-decoration:none; cursor:pointer; transition:all 0.2s; border:none;
+  background:transparent;
+}
+.nav-tab.active, .nav-tab:hover { background:var(--gold); color:var(--navy); }
+.nav-status { display:flex; align-items:center; gap:0.5rem; font-family:'DM Mono',monospace; font-size:0.6rem; color:var(--white-dim); letter-spacing:0.12em; }
+.status-dot { width:7px; height:7px; border-radius:50%; background:var(--green); animation: pulse-dot 2s infinite; }
+@keyframes pulse-dot { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(34,197,94,0.4)} 50%{opacity:0.8;box-shadow:0 0 0 5px rgba(34,197,94,0)} }
+
+/* ══ LAYOUT ═══════════════════════════════════════════════ */
+.app { display:flex; min-height:100vh; padding-top:58px; }
+
+/* sidebar */
+.sidebar {
+  width: 260px; flex-shrink:0;
+  background: var(--navy-mid);
+  border-right: 1px solid var(--border);
+  display:flex; flex-direction:column;
+  position: fixed; top:58px; left:0; bottom:0;
+  overflow-y:auto;
+}
+.sidebar-header {
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border-dim);
+}
+.sidebar-title { font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:0.25em; color:var(--gold); text-transform:uppercase; }
+.sidebar-agents { padding:0.8rem 0; }
+.agent-btn {
+  width:100%; display:flex; align-items:center; gap:0.9rem;
+  padding: 0.85rem 1.5rem;
+  background:transparent; border:none; cursor:pointer;
+  transition:all 0.2s; text-align:left;
+  border-left: 3px solid transparent;
+  position:relative;
+}
+.agent-btn:hover { background:rgba(255,255,255,0.03); }
+.agent-btn.active { background:rgba(201,168,76,0.06); border-left-color:var(--gold); }
+.agent-icon {
+  width:34px; height:34px; border-radius:4px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1rem; flex-shrink:0;
+}
+.agent-info { flex:1; min-width:0; }
+.agent-name { font-family:'Playfair Display',serif; font-size:0.85rem; font-weight:700; color:var(--white); display:block; }
+.agent-role { font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:0.1em; color:var(--white-dim); text-transform:uppercase; margin-top:0.1rem; display:block; }
+.agent-status-badge {
+  width:7px; height:7px; border-radius:50%; flex-shrink:0;
+  background:var(--green);
+}
+
+.sidebar-divider { height:1px; background:var(--border-dim); margin:0.5rem 1.5rem; }
+
+.sidebar-info {
+  margin-top:auto; padding:1.2rem 1.5rem;
+  border-top:1px solid var(--border-dim);
+}
+.sidebar-info p { font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:0.1em; color:var(--white-dim); line-height:1.7; }
+
+/* main */
+.main { flex:1; margin-left:260px; display:flex; flex-direction:column; min-height:calc(100vh - 58px); }
+
+/* ══ AGENT PANELS ══════════════════════════════════════════ */
+.agent-panel { display:none; flex:1; flex-direction:column; }
+.agent-panel.active { display:flex; }
+
+/* panel header */
+.panel-header {
+  padding:1.8rem 2.5rem 1.4rem;
+  border-bottom:1px solid var(--border-dim);
+  display:flex; align-items:flex-start; justify-content:space-between;
+  background:var(--navy-mid);
+  flex-shrink:0;
+}
+.panel-header-left { display:flex; align-items:center; gap:1.2rem; }
+.panel-big-icon { width:52px; height:52px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; }
+.panel-title { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; line-height:1.1; }
+.panel-subtitle { font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase; margin-top:0.3rem; }
+.panel-meta { display:flex; gap:1.5rem; align-items:center; }
+.panel-meta-item { font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:0.12em; color:var(--white-dim); display:flex; flex-direction:column; gap:0.2rem; text-align:right; }
+.panel-meta-val { color:var(--gold); font-size:0.75rem; }
+
+/* panel body */
+.panel-body { flex:1; display:grid; grid-template-columns:1fr 1.2fr; overflow:hidden; }
+.panel-input-col { padding:2rem 2rem 2rem 2.5rem; border-right:1px solid var(--border-dim); display:flex; flex-direction:column; gap:1.2rem; overflow-y:auto; }
+.panel-output-col { display:flex; flex-direction:column; overflow:hidden; }
+
+/* form elements */
+.field-label { font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--gold); margin-bottom:0.4rem; display:block; }
+.field-hint { font-family:'DM Mono',monospace; font-size:0.55rem; color:var(--white-dim); margin-bottom:0.6rem; display:block; letter-spacing:0.08em; }
+
+textarea, input[type="text"], select {
+  width:100%; background:var(--navy-input);
+  border:1px solid var(--border-dim);
+  color:var(--white); padding:0.8rem 1rem;
+  font-family:'Crimson Pro',serif; font-size:1rem;
+  resize:vertical; transition:border-color 0.2s;
+  outline:none; line-height:1.6;
+}
+textarea:focus, input:focus, select:focus { border-color:var(--gold-dim); }
+textarea { min-height:120px; }
+select { appearance:none; cursor:pointer; }
+select option { background:var(--navy-card); }
+
+.run-btn {
+  width:100%; padding:0.9rem;
+  background:var(--gold); color:var(--navy);
+  font-family:'DM Mono',monospace; font-size:0.75rem;
+  letter-spacing:0.18em; text-transform:uppercase;
+  border:none; cursor:pointer; font-weight:500;
+  transition:all 0.25s; position:relative; overflow:hidden;
+}
+.run-btn::before { content:''; position:absolute; inset:0; background:var(--gold-light); transform:translateX(-100%); transition:transform 0.3s; }
+.run-btn:hover::before { transform:translateX(0); }
+.run-btn span { position:relative; z-index:1; }
+.run-btn:disabled { opacity:0.5; cursor:not-allowed; }
+.run-btn:disabled::before { display:none; }
+
+.clear-btn {
+  width:100%; padding:0.55rem;
+  background:transparent; color:var(--white-dim);
+  font-family:'DM Mono',monospace; font-size:0.6rem;
+  letter-spacing:0.15em; text-transform:uppercase;
+  border:1px solid var(--border-dim); cursor:pointer;
+  transition:all 0.2s;
+}
+.clear-btn:hover { border-color:var(--white-dim); color:var(--white); }
+
+/* output area */
+.output-header {
+  padding:1rem 1.5rem; border-bottom:1px solid var(--border-dim);
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--navy-card); flex-shrink:0;
+}
+.output-label { font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:0.2em; color:var(--gold); text-transform:uppercase; }
+.output-controls { display:flex; gap:0.5rem; }
+.out-ctrl-btn {
+  font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:0.1em;
+  text-transform:uppercase; padding:0.3rem 0.7rem; background:transparent;
+  border:1px solid var(--border-dim); color:var(--white-dim); cursor:pointer;
+  transition:all 0.2s;
+}
+.out-ctrl-btn:hover { border-color:var(--gold-dim); color:var(--gold); }
+
+.output-body {
+  flex:1; overflow-y:auto; padding:1.5rem;
+  background:var(--navy);
+}
+
+/* response bubbles */
+.response-empty {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  height:100%; gap:1rem; opacity:0.3;
+}
+.response-empty-icon { font-size:3rem; }
+.response-empty-text { font-family:'DM Mono',monospace; font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; }
+
+.response-block {
+  background:var(--navy-card); border:1px solid var(--border-dim);
+  padding:1.5rem; margin-bottom:1rem;
+  animation:slideIn 0.4s ease;
+  border-left:3px solid var(--gold);
+}
+
+@keyframes slideIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+.response-meta {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:1rem; padding-bottom:0.7rem;
+  border-bottom:1px solid var(--border-dim);
+}
+.response-agent-tag { font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--gold); }
+.response-time { font-family:'DM Mono',monospace; font-size:0.55rem; color:var(--white-dim); }
+.response-content { font-size:1rem; line-height:1.75; color:var(--white-dim); font-weight:300; white-space:pre-wrap; }
+.response-content strong { color:var(--white); font-weight:600; }
+
+/* typing indicator */
+.typing-block {
+  background:var(--navy-card); border:1px solid var(--border-dim);
+  padding:1.2rem 1.5rem; margin-bottom:1rem;
+  border-left:3px solid var(--gold-dim);
+  display:flex; align-items:center; gap:0.8rem;
+}
+.typing-dots { display:flex; gap:0.35rem; }
+.typing-dots span {
+  width:6px; height:6px; border-radius:50%; background:var(--gold);
+  animation:typingBounce 1.2s infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay:0.2s; }
+.typing-dots span:nth-child(3) { animation-delay:0.4s; }
+@keyframes typingBounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-8px)} }
+.typing-label { font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:0.15em; color:var(--white-dim); text-transform:uppercase; }
+
+/* error block */
+.error-block {
+  background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.3);
+  padding:1rem 1.2rem; margin-bottom:1rem;
+  border-left:3px solid var(--red);
+  font-family:'DM Mono',monospace; font-size:0.7rem; color:#fca5a5;
+  line-height:1.6;
+}
+
+/* section fields */
+.field-group { display:flex; flex-direction:column; gap:0.3rem; }
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.tag-row { display:flex; flex-wrap:wrap; gap:0.4rem; margin-top:0.5rem; }
+.tag {
+  font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:0.1em;
+  text-transform:uppercase; padding:0.25rem 0.6rem;
+  border:1px solid var(--border-dim); color:var(--white-dim); cursor:pointer;
+  transition:all 0.2s; user-select:none;
+}
+.tag.selected { border-color:var(--gold); color:var(--gold); background:var(--gold-glow); }
+
+/* section divider in input */
+.input-divider {
+  border:none; border-top:1px solid var(--border-dim); margin:0.5rem 0;
+}
+
+/* stat strip */
+.stat-strip {
+  display:flex; gap:0; border-top:1px solid var(--border-dim);
+  flex-shrink:0; background:var(--navy-mid);
+}
+.strip-stat {
+  flex:1; padding:0.7rem 1rem; text-align:center;
+  border-right:1px solid var(--border-dim);
+  transition:background 0.2s;
+}
+.strip-stat:last-child { border-right:none; }
+.strip-val { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color:var(--gold); }
+.strip-key { font-family:'DM Mono',monospace; font-size:0.5rem; letter-spacing:0.15em; color:var(--white-dim); text-transform:uppercase; margin-top:0.1rem; }
+
+/* ══ DASHBOARD (HOME) ══════════════════════════════════════ */
+#panel-home { display:flex; flex-direction:column; overflow:auto; }
+.dashboard-hero {
+  padding:3rem 2.5rem 2rem;
+  background: linear-gradient(135deg, var(--navy-mid) 0%, var(--navy) 100%);
+  border-bottom:1px solid var(--border-dim);
+  position:relative; overflow:hidden;
+}
+.dashboard-hero::before {
+  content:''; position:absolute; top:-50%; right:-10%;
+  width:500px; height:500px; border-radius:50%;
+  background:radial-gradient(circle, rgba(201,168,76,0.05) 0%, transparent 70%);
+  pointer-events:none;
+}
+.dashboard-greeting { font-family:'DM Mono',monospace; font-size:0.65rem; letter-spacing:0.3em; color:var(--gold); text-transform:uppercase; margin-bottom:0.8rem; }
+.dashboard-title { font-family:'Playfair Display',serif; font-size:2.2rem; font-weight:700; line-height:1.15; margin-bottom:0.8rem; }
+.dashboard-title em { font-style:italic; color:var(--gold); }
+.dashboard-desc { font-size:1.05rem; color:var(--white-dim); font-weight:300; max-width:580px; line-height:1.7; }
+
+.agent-cards-grid {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:1px; background:var(--border-dim);
+  border-top:1px solid var(--border-dim);
+  flex:1;
+}
+.agent-card {
+  background:var(--navy); padding:2rem 1.8rem;
+  cursor:pointer; transition:all 0.3s; position:relative;
+  overflow:hidden; display:flex; flex-direction:column; gap:1rem;
+}
+.agent-card::after {
+  content:''; position:absolute; bottom:0; left:0; right:0;
+  height:2px; transform:scaleX(0); transition:transform 0.3s;
+}
+.agent-card:hover { background:var(--navy-card); }
+.agent-card:hover::after { transform:scaleX(1); }
+
+.card-icon-row { display:flex; align-items:center; justify-content:space-between; }
+.card-big-icon { width:44px; height:44px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; }
+.card-arrow { font-family:'DM Mono',monospace; font-size:0.8rem; color:var(--white-dim); transition:transform 0.2s, color 0.2s; }
+.agent-card:hover .card-arrow { transform:translate(3px,-3px); }
+
+.card-name { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; }
+.card-desc { font-size:0.9rem; color:var(--white-dim); font-weight:300; line-height:1.6; flex:1; }
+.card-tag { font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:0.15em; text-transform:uppercase; padding:0.25rem 0.6rem; border:1px solid; width:fit-content; }
+
+/* agent-specific accent colours */
+.acc-ci { color:var(--agent-ci); border-color:var(--agent-ci); background:rgba(201,168,76,0.08); }
+.acc-ca { color:var(--agent-ca); border-color:var(--agent-ca); background:rgba(129,140,248,0.08); }
+.acc-st { color:var(--agent-st); border-color:var(--agent-st); background:rgba(52,211,153,0.08); }
+.acc-mc { color:var(--agent-mc); border-color:var(--agent-mc); background:rgba(248,113,113,0.08); }
+.acc-lf { color:var(--agent-lf); border-color:var(--agent-lf); background:rgba(251,146,60,0.08); }
+.acc-pd { color:var(--agent-pd); border-color:var(--agent-pd); background:rgba(167,139,250,0.08); }
+
+.acc-ci-border::after { background:var(--agent-ci); }
+.acc-ca-border::after { background:var(--agent-ca); }
+.acc-st-border::after { background:var(--agent-st); }
+.acc-mc-border::after { background:var(--agent-mc); }
+.acc-lf-border::after { background:var(--agent-lf); }
+.acc-pd-border::after { background:var(--agent-pd); }
+
+.panel-subtitle.acc-ci { color:var(--agent-ci); background:none; border:none; padding:0; }
+.panel-subtitle.acc-ca { color:var(--agent-ca); background:none; border:none; padding:0; }
+.panel-subtitle.acc-st { color:var(--agent-st); background:none; border:none; padding:0; }
+.panel-subtitle.acc-mc { color:var(--agent-mc); background:none; border:none; padding:0; }
+.panel-subtitle.acc-lf { color:var(--agent-lf); background:none; border:none; padding:0; }
+.panel-subtitle.acc-pd { color:var(--agent-pd); background:none; border:none; padding:0; }
+
+/* score bar */
+.score-row { display:flex; flex-direction:column; gap:0.7rem; margin:0.5rem 0; }
+.score-item { display:flex; flex-direction:column; gap:0.3rem; }
+.score-label-row { display:flex; justify-content:space-between; font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:0.1em; color:var(--white-dim); }
+.score-track { height:3px; background:rgba(255,255,255,0.08); }
+.score-fill { height:100%; transition:width 1s ease; }
+
+/* copy toast */
+.toast {
+  position:fixed; bottom:2rem; right:2rem; z-index:9000;
+  background:var(--gold); color:var(--navy);
+  font-family:'DM Mono',monospace; font-size:0.65rem; letter-spacing:0.15em;
+  text-transform:uppercase; padding:0.6rem 1.2rem;
+  opacity:0; transform:translateY(10px); transition:all 0.3s;
+  pointer-events:none;
+}
+.toast.show { opacity:1; transform:translateY(0); }
+
+/* scrollbar */
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--gold-dim); }
+
+/* responsive */
+@media(max-width:900px) {
+  .sidebar { display:none; }
+  .main { margin-left:0; }
+  .panel-body { grid-template-columns:1fr; }
+  .panel-input-col { border-right:none; border-bottom:1px solid var(--border-dim); }
+  .agent-cards-grid { grid-template-columns:1fr; }
+  .two-col { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="CourtDebaters.html" class="nav-brand">
+    <span class="nav-brand-name">Court Debaters</span>
+    <span class="nav-brand-sub">Constitutional Intelligence</span>
+  </a>
+  <div class="nav-center">
+    <button class="nav-tab active" onclick="showPanel('home')">Command Centre</button>
+    <button class="nav-tab" onclick="showPanel('ci')">CI Engine</button>
+    <button class="nav-tab" onclick="showPanel('ca')">Case Analysis</button>
+    <button class="nav-tab" onclick="showPanel('st')">Strategy</button>
+    <button class="nav-tab" onclick="showPanel('mc')">Mock Court</button>
+    <button class="nav-tab" onclick="showPanel('lf')">Fallacy Scan</button>
+    <button class="nav-tab" onclick="showPanel('pd')">Petition AI</button>
+  </div>
+  <div class="nav-status">
+    <div class="status-dot"></div>
+    <span>6 Agents Online</span>
+  </div>
+</nav>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">AI Agents</div>
+    </div>
+    <div class="sidebar-agents">
+
+      <button class="agent-btn active" onclick="showPanel('home')">
+        <div class="agent-icon" style="background:rgba(201,168,76,0.12);">🏛️</div>
+        <div class="agent-info">
+          <span class="agent-name">Command Centre</span>
+          <span class="agent-role">All Agents Dashboard</span>
+        </div>
+        <div class="agent-status-badge"></div>
+      </button>
+
+      <div class="sidebar-divider"></div>
+
+      <button class="agent-btn" onclick="showPanel('ci')">
+        <div class="agent-icon" style="background:rgba(201,168,76,0.1);">⚖️</div>
+        <div class="agent-info">
+          <span class="agent-name">CI Engine</span>
+          <span class="agent-role">Constitutional Intelligence</span>
+        </div>
+        <div class="agent-status-badge"></div>
+      </button>
+
+      <button class="agent-btn" onclick="showPanel('ca')">
+        <div class="agent-icon" style="background:rgba(129,140,248,0.1);">🔍</div>
+        <div class="agent-info">
+          <span class="agent-name">Case Analyst</span>
+          <span class="agent-role">Legal Case Analysis</span>
+        </div>
+        <div class="agent-status-badge"></div>
+      </button>
+
+      <button class="agent-btn" onclick="showPanel('st')">
+        <div class="agent-icon" style="background:rgba(52,211,153,0.1);">♟️</div>
+        <div class="agent-info">
+          <span class="agent-name">Strategy Engine</span>
+          <span class="agent-role">Chess-Mode Argument Planner</span>
+        </div>
+        <div class="agent-status-badge"></div>
+      </button>
+
+      <button class="agent-btn" onclick="showPanel('mc')">
+        <div class="agent-icon" style="background:rgba(248,113,113,0.1);">🎭</div>
+        <div class="agent-info">
+          <span class="agent-name">Mock Court</span>
+          <span class="agent-role">Cross-Examination Simulator</span>
+        </div>
+        <div class="agent-status-badge"></div>
+      </button>
+
+      <button class="agent-btn" onclick="showPanel('lf')">
+        <div class="agent-icon" style="background:rgba(251,146,60,0.1);">🔬</div>
+        <div class="agent-info">
+          <span class="agent-name">Fallacy Scanner</span>
+          <span class="agent-role">Logical Fallacy Detector</span>
+        </div>
+        <div class="agent-status-badge"></div>
+      </button>
+
+      <button class="agent-btn" onclick="showPanel('pd')">
+        <div class="agent-icon" style="background:rgba(167,139,250,0.1);">📜</div>
+        <div class="agent-info">
+          <span class="agent-name">Petition Drafter</span>
+          <span class="agent-role">AI Petition Writer</span>
+        </div>
+        <div class="agent-status-badge"></div>
+      </button>
+
+    </div>
+    <div class="sidebar-info">
+      <p>Powered by Constitutional Intelligence v1.0<br>India Legal Corpus • All Agents Active</p>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- ══ HOME DASHBOARD ══ -->
+    <div id="panel-home" class="agent-panel active">
+      <div class="dashboard-hero">
+        <div class="dashboard-greeting">Constitutional Intelligence Command Centre</div>
+        <h1 class="dashboard-title">Your AI Legal<br><em>Intelligence</em> Team</h1>
+        <p class="dashboard-desc">Six specialized AI agents, each trained on Indian constitutional law and legal reasoning. Select an agent to begin working on your case.</p>
+      </div>
+
+      <div class="agent-cards-grid">
+        <div class="agent-card acc-ci-border" onclick="showPanel('ci')">
+          <div class="card-icon-row">
+            <div class="card-big-icon acc-ci">⚖️</div>
+            <span class="card-arrow">↗</span>
+          </div>
+          <div class="card-name">Constitutional Intelligence Engine</div>
+          <div class="card-desc">Analyses any legal argument against the Indian Constitution. Maps precedents, identifies vulnerabilities, applies multiple judicial philosophies.</div>
+          <div class="card-tag acc-ci">Pillar 01</div>
+        </div>
+        <div class="agent-card acc-ca-border" onclick="showPanel('ca')">
+          <div class="card-icon-row">
+            <div class="card-big-icon acc-ca">🔍</div>
+            <span class="card-arrow">↗</span>
+          </div>
+          <div class="card-name">Case Analysis Agent</div>
+          <div class="card-desc">Input case facts and get a full structured legal analysis — key issues, relevant statutes, constitutional angles, risks, and strategic recommendations.</div>
+          <div class="card-tag acc-ca">Pillar 02</div>
+        </div>
+        <div class="agent-card acc-st-border" onclick="showPanel('st')">
+          <div class="card-icon-row">
+            <div class="card-big-icon acc-st">♟️</div>
+            <span class="card-arrow">↗</span>
+          </div>
+          <div class="card-name">Strategy Simulator</div>
+          <div class="card-desc">Chess-mode legal strategy builder. Scores your argument plan, predicts opposing moves, and optimises your case approach before you enter court.</div>
+          <div class="card-tag acc-st">Pillar 03</div>
+        </div>
+        <div class="agent-card acc-mc-border" onclick="showPanel('mc')">
+          <div class="card-icon-row">
+            <div class="card-big-icon acc-mc">🎭</div>
+            <span class="card-arrow">↗</span>
+          </div>
+          <div class="card-name">Mock Court Simulator</div>
+          <div class="card-desc">Face an AI opposing counsel in a live cross-examination. Your arguments are challenged in real time — exposing weaknesses before trial day.</div>
+          <div class="card-tag acc-mc">Pillar 04</div>
+        </div>
+        <div class="agent-card acc-lf-border" onclick="showPanel('lf')">
+          <div class="card-icon-row">
+            <div class="card-big-icon acc-lf">🔬</div>
+            <span class="card-arrow">↗</span>
+          </div>
+          <div class="card-name">Logical Fallacy Scanner</div>
+          <div class="card-desc">Paste any legal argument. Get a full fallacy audit — every weak point, every logical error, and how to fix each one for maximum constitutional strength.</div>
+          <div class="card-tag acc-lf">Pillar 05</div>
+        </div>
+        <div class="agent-card acc-pd-border" onclick="showPanel('pd')">
+          <div class="card-icon-row">
+            <div class="card-big-icon acc-pd">📜</div>
+            <span class="card-arrow">↗</span>
+          </div>
+          <div class="card-name">Petition Drafter</div>
+          <div class="card-desc">AI drafts structured legal petitions for Indian courts — from civil complaints to criminal FIR responses — grounded in the correct constitutional framework.</div>
+          <div class="card-tag acc-pd">Pillar 06</div>
+        </div>
+      </div>
+
+      <div class="stat-strip">
+        <div class="strip-stat"><div class="strip-val">6</div><div class="strip-key">Active Agents</div></div>
+        <div class="strip-stat"><div class="strip-val">Indian</div><div class="strip-key">Legal Corpus</div></div>
+        <div class="strip-stat"><div class="strip-val">CI</div><div class="strip-key">Intelligence Type</div></div>
+        <div class="strip-stat"><div class="strip-val">Real-time</div><div class="strip-key">AI Responses</div></div>
+        <div class="strip-stat"><div class="strip-val">All Courts</div><div class="strip-key">Coverage</div></div>
+      </div>
+    </div>
+
+    <!-- ══ AGENT 1: CONSTITUTIONAL INTELLIGENCE ENGINE ══ -->
+    <div id="panel-ci" class="agent-panel">
+      <div class="panel-header">
+        <div class="panel-header-left">
+          <div class="panel-big-icon acc-ci">⚖️</div>
+          <div>
+            <div class="panel-title">Constitutional Intelligence Engine</div>
+            <div class="panel-subtitle acc-ci">Pillar 01 — Constitutional Analysis & Stress Testing</div>
+          </div>
+        </div>
+        <div class="panel-meta">
+          <div class="panel-meta-item"><span>Corpus</span><span class="panel-meta-val">Indian Constitution</span></div>
+          <div class="panel-meta-item"><span>Mode</span><span class="panel-meta-val">Multi-Philosophy</span></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="panel-input-col">
+          <div class="field-group">
+            <label class="field-label">Legal Argument or Position</label>
+            <span class="field-hint">Enter the legal argument you want constitutionally stress-tested</span>
+            <textarea id="ci-argument" placeholder="E.g. The state's order to demolish the petitioner's home without prior notice violates their fundamental rights under Article 21 of the Indian Constitution..."></textarea>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Court Level</label>
+            <select id="ci-court">
+              <option value="district">District Court</option>
+              <option value="high" selected>High Court</option>
+              <option value="supreme">Supreme Court of India</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Judicial Philosophy to Test Against</label>
+            <div class="tag-row">
+              <span class="tag selected" onclick="toggleTag(this)">Textualism</span>
+              <span class="tag selected" onclick="toggleTag(this)">Purposivism</span>
+              <span class="tag" onclick="toggleTag(this)">Originalism</span>
+              <span class="tag" onclick="toggleTag(this)">Living Constitution</span>
+              <span class="tag" onclick="toggleTag(this)">Structuralism</span>
+            </div>
+          </div>
+          <hr class="input-divider">
+          <button class="run-btn" onclick="runAgent('ci')"><span>⚖ Run Constitutional Analysis</span></button>
+          <button class="clear-btn" onclick="clearOutput('ci')">Clear Output</button>
+        </div>
+        <div class="panel-output-col">
+          <div class="output-header">
+            <span class="output-label">Constitutional Analysis Report</span>
+            <div class="output-controls">
+              <button class="out-ctrl-btn" onclick="copyOutput('ci')">Copy</button>
+            </div>
+          </div>
+          <div class="output-body" id="ci-output">
+            <div class="response-empty">
+              <div class="response-empty-icon">⚖️</div>
+              <div class="response-empty-text">Awaiting Constitutional Analysis</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ AGENT 2: CASE ANALYSIS ══ -->
+    <div id="panel-ca" class="agent-panel">
+      <div class="panel-header">
+        <div class="panel-header-left">
+          <div class="panel-big-icon acc-ca">🔍</div>
+          <div>
+            <div class="panel-title">Case Analysis Agent</div>
+            <div class="panel-subtitle acc-ca">Pillar 02 — Full Legal Case Intelligence</div>
+          </div>
+        </div>
+        <div class="panel-meta">
+          <div class="panel-meta-item"><span>Division</span><span class="panel-meta-val">All Divisions</span></div>
+          <div class="panel-meta-item"><span>Output</span><span class="panel-meta-val">Structured Report</span></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="panel-input-col">
+          <div class="field-group">
+            <label class="field-label">Case Facts</label>
+            <span class="field-hint">Describe the full case — parties involved, events, claims, and context</span>
+            <textarea id="ca-facts" style="min-height:150px" placeholder="E.g. Plaintiff Ram Sharma purchased agricultural land in Maharashtra in 2018. The local municipality issued a demolition notice in 2024 without any prior hearing. Plaintiff claims this violates natural justice and Article 21..."></textarea>
+          </div>
+          <div class="two-col">
+            <div class="field-group">
+              <label class="field-label">Law Division</label>
+              <select id="ca-division">
+                <option value="civil">Civil Law</option>
+                <option value="criminal">Criminal Law</option>
+                <option value="corporate">Corporate Law</option>
+                <option value="constitutional">Constitutional Law</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Client's Position</label>
+              <select id="ca-position">
+                <option value="plaintiff">Plaintiff / Petitioner</option>
+                <option value="defendant">Defendant / Respondent</option>
+                <option value="neutral">Neutral Assessment</option>
+              </select>
+            </div>
+          </div>
+          <hr class="input-divider">
+          <button class="run-btn" onclick="runAgent('ca')"><span>🔍 Analyse Case</span></button>
+          <button class="clear-btn" onclick="clearOutput('ca')">Clear Output</button>
+        </div>
+        <div class="panel-output-col">
+          <div class="output-header">
+            <span class="output-label">Case Intelligence Report</span>
+            <div class="output-controls">
+              <button class="out-ctrl-btn" onclick="copyOutput('ca')">Copy</button>
+            </div>
+          </div>
+          <div class="output-body" id="ca-output">
+            <div class="response-empty">
+              <div class="response-empty-icon">🔍</div>
+              <div class="response-empty-text">Awaiting Case Analysis</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ AGENT 3: STRATEGY ══ -->
+    <div id="panel-st" class="agent-panel">
+      <div class="panel-header">
+        <div class="panel-header-left">
+          <div class="panel-big-icon acc-st">♟️</div>
+          <div>
+            <div class="panel-title">Strategy Simulator</div>
+            <div class="panel-subtitle acc-st">Pillar 03 — Chess-Mode Legal Strategy Engine</div>
+          </div>
+        </div>
+        <div class="panel-meta">
+          <div class="panel-meta-item"><span>Mode</span><span class="panel-meta-val">Chess Strategy</span></div>
+          <div class="panel-meta-item"><span>Depth</span><span class="panel-meta-val">5-Move Lookahead</span></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="panel-input-col">
+          <div class="field-group">
+            <label class="field-label">Your Current Legal Strategy</label>
+            <span class="field-hint">Describe your intended approach to arguing this case</span>
+            <textarea id="st-strategy" placeholder="E.g. My strategy is to first establish that the demolition notice was issued without a hearing, then argue violation of Article 21 (right to life and personal liberty), and finally cite the Olga Tellis judgment to support the right to livelihood..."></textarea>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Opposing Counsel's Known Strategy (if any)</label>
+            <textarea id="st-opposing" style="min-height:80px" placeholder="E.g. Opposing counsel is expected to argue the demolition was lawful under the Municipal Act 1965..."></textarea>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Desired Outcome</label>
+            <input type="text" id="st-outcome" placeholder="E.g. Stay order on demolition + constitutional violation declaration">
+          </div>
+          <hr class="input-divider">
+          <button class="run-btn" onclick="runAgent('st')"><span>♟ Simulate Strategy</span></button>
+          <button class="clear-btn" onclick="clearOutput('st')">Clear Output</button>
+        </div>
+        <div class="panel-output-col">
+          <div class="output-header">
+            <span class="output-label">Strategic Battle Plan</span>
+            <div class="output-controls">
+              <button class="out-ctrl-btn" onclick="copyOutput('st')">Copy</button>
+            </div>
+          </div>
+          <div class="output-body" id="st-output">
+            <div class="response-empty">
+              <div class="response-empty-icon">♟️</div>
+              <div class="response-empty-text">Awaiting Strategy Simulation</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ AGENT 4: MOCK COURT ══ -->
+    <div id="panel-mc" class="agent-panel">
+      <div class="panel-header">
+        <div class="panel-header-left">
+          <div class="panel-big-icon acc-mc">🎭</div>
+          <div>
+            <div class="panel-title">Mock Court Simulator</div>
+            <div class="panel-subtitle acc-mc">Pillar 04 — Live Cross-Examination Training</div>
+          </div>
+        </div>
+        <div class="panel-meta">
+          <div class="panel-meta-item"><span>AI Role</span><span class="panel-meta-val">Opposing Counsel</span></div>
+          <div class="panel-meta-item"><span>Mode</span><span class="panel-meta-val">Adversarial</span></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="panel-input-col">
+          <div class="field-group">
+            <label class="field-label">Your Argument / Statement in Court</label>
+            <span class="field-hint">State your position as you would in court. The AI will cross-examine you.</span>
+            <textarea id="mc-statement" style="min-height:140px" placeholder="E.g. My lord, my client was denied the opportunity to be heard before the demolition order was issued. This is a clear violation of natural justice — audi alteram partem — and Article 21 of the Constitution of India which guarantees the right to life and dignity..."></textarea>
+          </div>
+          <div class="field-group">
+            <label class="field-label">AI Plays Role Of</label>
+            <select id="mc-role">
+              <option value="opposing">Opposing Counsel (hostile cross-examination)</option>
+              <option value="judge">Judge (probing questions)</option>
+              <option value="witness">Hostile Witness</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Intensity Level</label>
+            <select id="mc-intensity">
+              <option value="moderate">Moderate — Training Mode</option>
+              <option value="aggressive">Aggressive — High Court Standard</option>
+              <option value="supreme">Supreme Court Level — Maximum Challenge</option>
+            </select>
+          </div>
+          <hr class="input-divider">
+          <button class="run-btn" onclick="runAgent('mc')"><span>🎭 Begin Cross-Examination</span></button>
+          <button class="clear-btn" onclick="clearOutput('mc')">Clear Output</button>
+        </div>
+        <div class="panel-output-col">
+          <div class="output-header">
+            <span class="output-label">Cross-Examination Session</span>
+            <div class="output-controls">
+              <button class="out-ctrl-btn" onclick="copyOutput('mc')">Copy</button>
+            </div>
+          </div>
+          <div class="output-body" id="mc-output">
+            <div class="response-empty">
+              <div class="response-empty-icon">🎭</div>
+              <div class="response-empty-text">Court Session Not Yet Started</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ AGENT 5: FALLACY SCANNER ══ -->
+    <div id="panel-lf" class="agent-panel">
+      <div class="panel-header">
+        <div class="panel-header-left">
+          <div class="panel-big-icon acc-lf">🔬</div>
+          <div>
+            <div class="panel-title">Logical Fallacy Scanner</div>
+            <div class="panel-subtitle acc-lf">Pillar 05 — Argument Psychology & Fallacy Detection</div>
+          </div>
+        </div>
+        <div class="panel-meta">
+          <div class="panel-meta-item"><span>Scan Type</span><span class="panel-meta-val">Deep Audit</span></div>
+          <div class="panel-meta-item"><span>Mode</span><span class="panel-meta-val">Argument Psychology</span></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="panel-input-col">
+          <div class="field-group">
+            <label class="field-label">Legal Argument to Scan</label>
+            <span class="field-hint">Paste any legal argument, written submission, or oral argument transcript</span>
+            <textarea id="lf-argument" style="min-height:180px" placeholder="E.g. The petitioner's claim must fail because everyone in the locality has accepted the municipal orders without complaint. Furthermore, since the demolition was carried out by government authorities, it must be lawful. The petitioner is simply trying to delay the inevitable and waste the court's time..."></textarea>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Scan Depth</label>
+            <select id="lf-depth">
+              <option value="quick">Quick Scan — Major Fallacies Only</option>
+              <option value="full" selected>Full Audit — All Fallacies + Psychology</option>
+              <option value="deep">Deep Analysis — Fallacies + Psychology + Fix Suggestions</option>
+            </select>
+          </div>
+          <hr class="input-divider">
+          <button class="run-btn" onclick="runAgent('lf')"><span>🔬 Scan for Fallacies</span></button>
+          <button class="clear-btn" onclick="clearOutput('lf')">Clear Output</button>
+        </div>
+        <div class="panel-output-col">
+          <div class="output-header">
+            <span class="output-label">Fallacy Audit Report</span>
+            <div class="output-controls">
+              <button class="out-ctrl-btn" onclick="copyOutput('lf')">Copy</button>
+            </div>
+          </div>
+          <div class="output-body" id="lf-output">
+            <div class="response-empty">
+              <div class="response-empty-icon">🔬</div>
+              <div class="response-empty-text">Awaiting Fallacy Scan</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ AGENT 6: PETITION DRAFTER ══ -->
+    <div id="panel-pd" class="agent-panel">
+      <div class="panel-header">
+        <div class="panel-header-left">
+          <div class="panel-big-icon acc-pd">📜</div>
+          <div>
+            <div class="panel-title">Petition Drafter</div>
+            <div class="panel-subtitle acc-pd">Pillar 06 — AI-Powered Legal Petition Writing</div>
+          </div>
+        </div>
+        <div class="panel-meta">
+          <div class="panel-meta-item"><span>Format</span><span class="panel-meta-val">Indian Courts</span></div>
+          <div class="panel-meta-item"><span>Mode</span><span class="panel-meta-val">Draft Generation</span></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="panel-input-col">
+          <div class="field-group">
+            <label class="field-label">Case Summary</label>
+            <span class="field-hint">Brief summary of the dispute and what relief is being sought</span>
+            <textarea id="pd-summary" style="min-height:120px" placeholder="E.g. My client's property was demolished by the BMC without prior notice or hearing in January 2025. Client is a daily wage labourer who lost his home of 15 years. We seek a writ of mandamus and compensation under Article 226..."></textarea>
+          </div>
+          <div class="two-col">
+            <div class="field-group">
+              <label class="field-label">Petition Type</label>
+              <select id="pd-type">
+                <option value="writ">Writ Petition (Article 226/32)</option>
+                <option value="civil">Civil Suit Plaint</option>
+                <option value="criminal">Criminal Complaint</option>
+                <option value="appeal">Appeal Petition</option>
+                <option value="injunction">Injunction Application</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Filing Court</label>
+              <select id="pd-court">
+                <option value="district">District Court</option>
+                <option value="high">High Court</option>
+                <option value="supreme">Supreme Court</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Petitioner's Name & Respondent</label>
+            <input type="text" id="pd-parties" placeholder="E.g. Ram Sharma vs Brihanmumbai Municipal Corporation">
+          </div>
+          <hr class="input-divider">
+          <button class="run-btn" onclick="runAgent('pd')"><span>📜 Draft Petition</span></button>
+          <button class="clear-btn" onclick="clearOutput('pd')">Clear Output</button>
+        </div>
+        <div class="panel-output-col">
+          <div class="output-header">
+            <span class="output-label">Draft Petition</span>
+            <div class="output-controls">
+              <button class="out-ctrl-btn" onclick="copyOutput('pd')">Copy</button>
+            </div>
+          </div>
+          <div class="output-body" id="pd-output">
+            <div class="response-empty">
+              <div class="response-empty-icon">📜</div>
+              <div class="response-empty-text">Awaiting Petition Draft</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">Copied to clipboard</div>
+
+<script>
+// ══ NAVIGATION ══════════════════════════════════════════
+function showPanel(id) {
+  document.querySelectorAll('.agent-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.agent-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
+  document.getElementById('panel-' + id)?.classList.add('active');
+
+  document.querySelectorAll('.agent-btn').forEach(b => {
+    if(b.getAttribute('onclick')?.includes("'" + id + "'")) b.classList.add('active');
+  });
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    if(t.getAttribute('onclick')?.includes("'" + id + "'")) t.classList.add('active');
+  });
+}
+
+function toggleTag(el) {
+  el.classList.toggle('selected');
+}
+
+// ══ AGENT SYSTEM PROMPTS ════════════════════════════════
+const AGENTS = {
+  ci: {
+    name: "Constitutional Intelligence Engine",
+    system: `You are the Constitutional Intelligence Engine of Court Debaters — India's premier AI constitutional analysis system. You are an expert in:
+- The Constitution of India (all Articles, Schedules, and Amendments)
+- Landmark Supreme Court and High Court judgments
+- Multiple judicial philosophies: Textualism, Purposivism, Originalism, Living Constitutionalism, and Structuralism
+- Indian constitutional doctrine: Basic Structure, Fundamental Rights, DPSPs, fundamental duties
+
+Your role: When given a legal argument or position, perform a rigorous constitutional stress-test. Your analysis must include:
+1. CONSTITUTIONAL MAPPING — which Articles apply and how
+2. STRENGTH ASSESSMENT — how constitutionally sound the argument is (rate 1-10)
+3. VULNERABILITY POINTS — where opposing counsel can attack constitutionally
+4. PRECEDENT ANALYSIS — cite at least 3 relevant Supreme Court judgments with year
+5. JUDICIAL PHILOSOPHY TEST — how does this argument fare under textualism vs purposivism vs living constitutionalism
+6. STRATEGIC RECOMMENDATIONS — how to strengthen the constitutional position
+
+Be precise, authoritative, and deeply rooted in Indian constitutional law. Write in the voice of a senior constitutional advocate.`
+  },
+
+  ca: {
+    name: "Case Analysis Agent",
+    system: `You are the Case Analysis Agent of Court Debaters — a senior Indian legal analyst with deep expertise across civil, criminal, and corporate law. You are trained on:
+- Indian Penal Code, Civil Procedure Code, Criminal Procedure Code
+- Indian Contract Act, Transfer of Property Act, Companies Act
+- Consumer Protection Act, Labour laws, Environmental laws
+- All major High Court and Supreme Court precedents
+
+Your role: When given case facts, produce a complete, structured legal intelligence report. Always include:
+1. CASE CLASSIFICATION — type of dispute, relevant law division, court jurisdiction
+2. KEY LEGAL ISSUES — enumerate every legal question the court must decide
+3. APPLICABLE STATUTES — list all relevant Acts, Sections, and Rules with precision
+4. CONSTITUTIONAL DIMENSIONS — any fundamental rights implications
+5. PRECEDENT MAP — 4-6 relevant landmark cases (Indian courts preferred) with brief ratios
+6. RISK ASSESSMENT — strengths and weaknesses of the client's position
+7. STRATEGIC RECOMMENDATIONS — top 3 moves the lawyer should prioritize
+8. EVIDENCE CHECKLIST — what documents, witnesses, and evidence are critical
+
+Be thorough, structured, and practical. Write like a senior advocate preparing a brief.`
+  },
+
+  st: {
+    name: "Strategy Simulator",
+    system: `You are the Strategy Simulator of Court Debaters — a master legal strategist who thinks like a chess grandmaster. You combine the analytical depth of a constitutional scholar with the tactical foresight of a Supreme Court advocate.
+
+Your role: When given a lawyer's intended strategy, perform a 5-level chess-mode analysis. Think several moves ahead. Your output must include:
+
+1. OPENING POSITION ASSESSMENT — rate the current strategy strength (1-10) with reasoning
+2. STRATEGIC ADVANTAGES — what this strategy does well constitutionally and tactically
+3. VULNERABILITIES — where opposing counsel can strike and how damaging each vulnerability is
+4. COUNTER-MOVES PREDICTION — what opposing counsel will likely argue (3-5 predicted moves)
+5. OPTIMISED STRATEGY — a revised, stronger strategic plan in sequenced steps
+6. TACTICAL RECOMMENDATIONS — specific courtroom moves, argument ordering, and timing
+7. ENDGAME SCENARIOS — 3 possible outcomes (best case, likely case, worst case)
+8. CHESS SCORE — rate the strategy: Opening (x/10), Middle Game (x/10), Endgame (x/10)
+
+Be bold, strategic, and precise. Think like a grandmaster who has never lost a constitutional battle.`
+  },
+
+  mc: {
+    name: "Mock Court Agent",
+    system: `You are the Mock Court Agent of Court Debaters — you can play three roles with equal mastery:
+
+AS OPPOSING COUNSEL: You are a sharp, relentless Senior Advocate who will cross-examine the lawyer's argument. Find every logical gap, constitutional weakness, and factual inconsistency. Be adversarial, probing, and relentless — but stay within legal and professional bounds.
+
+AS JUDGE: You are a probing High Court or Supreme Court judge. Ask searching questions that test the constitutional foundations of the argument. Challenge assumptions. Demand precision.
+
+AS HOSTILE WITNESS: You are a witness who is evasive and unhelpful. Force the examining lawyer to work hard for every answer.
+
+Your output structure:
+1. ROLE STATEMENT — confirm which role you are playing
+2. INITIAL CHALLENGE — your strongest opening attack on the argument presented
+3. CROSS-EXAMINATION QUESTIONS — 5-7 pointed, specific questions that expose weaknesses
+4. ARGUMENT ANALYSIS — what's genuinely weak in what was presented
+5. HOW TO SURVIVE THIS — advice on how the lawyer should prepare to handle these challenges
+6. COURTROOM SCORE — rate the argument as presented: Clarity (x/10), Constitutional Strength (x/10), Persuasiveness (x/10)
+
+Be challenging, realistic, and genuinely difficult. This is training for real courtrooms.`
+  },
+
+  lf: {
+    name: "Logical Fallacy Scanner",
+    system: `You are the Logical Fallacy Scanner of Court Debaters — the most rigorous argument analyst in Indian legal practice. You detect not just logical fallacies but the psychological and rhetorical patterns that undermine legal arguments.
+
+Your expertise covers:
+- All classical logical fallacies: Ad Hominem, Straw Man, False Dilemma, Slippery Slope, Ad Populum, Appeal to Authority, Circular Reasoning, Post Hoc, Hasty Generalisation, Red Herring, Tu Quoque, Appeal to Emotion
+- Legal-specific argument weaknesses: unsupported assertions, misquoted precedent, jurisdiction errors, procedural argument gaps
+- Argument psychology: cognitive biases embedded in legal language (anchoring, availability heuristic, framing effects, confirmation bias)
+- Rhetorical analysis: persuasion techniques, credibility signals, emotional triggers
+
+Your output must include:
+1. FALLACY INVENTORY — list every fallacy found with exact quote from the argument and explanation of why it's fallacious
+2. SEVERITY RATING — rate each fallacy: Critical / Significant / Minor
+3. PSYCHOLOGICAL ANALYSIS — what cognitive biases or emotional manipulation is present
+4. ARGUMENT STRENGTH SCORE — overall logical soundness (0-100)
+5. FIX RECOMMENDATIONS — for each fallacy, a specific, actionable fix
+6. REBUILT ARGUMENT — offer a logically clean version of the core argument without the fallacies
+
+Be mercilessly precise. No fallacy should escape detection.`
+  },
+
+  pd: {
+    name: "Petition Drafter",
+    system: `You are the Petition Drafter of Court Debaters — a master drafter of Indian legal petitions. You are trained on the format, language, and constitutional requirements of all Indian court filings.
+
+Your expertise:
+- Writ Petitions under Article 226 (High Courts) and Article 32 (Supreme Court)
+- Civil Suit Plaints under CPC
+- Criminal Complaints and FIR responses under CrPC
+- Appeals and Revision Petitions
+- Injunction Applications
+
+Draft format must follow Indian court conventions:
+- Proper party identification (Petitioner vs Respondent)
+- Jurisdiction statement
+- Statement of facts (numbered paragraphs)
+- Grounds (constitutional, statutory, and equitable)
+- Prayer for relief
+- Verification clause
+
+Your drafts must:
+1. Be structured in proper Indian court petition format
+2. Cite specific constitutional Articles and statutory provisions
+3. Reference at least 2-3 relevant Supreme Court precedents supporting the grounds
+4. Include specific prayers for relief (stay, mandamus, compensation, etc.)
+5. Use precise legal language appropriate to the court level
+6. Be immediately usable as a working draft by any Indian advocate
+
+Produce a complete, court-ready draft. Be thorough and professional.`
+  }
+};
+
+// ══ CORE API CALL ════════════════════════════════════════
+async function callClaude(systemPrompt, userMessage) {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userMessage }]
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `API error ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.content?.map(b => b.text || '').join('') || '';
+}
+
+// ══ AGENT RUNNERS ════════════════════════════════════════
+function buildUserMessage(agentId) {
+  switch(agentId) {
+    case 'ci': {
+      const arg = document.getElementById('ci-argument').value.trim();
+      if(!arg) return null;
+      const court = document.getElementById('ci-court').value;
+      const philosophies = [...document.querySelectorAll('#panel-ci .tag.selected')].map(t => t.textContent).join(', ');
+      return `LEGAL ARGUMENT TO ANALYSE:\n"${arg}"\n\nCOURT LEVEL: ${court}\nJUDICIAL PHILOSOPHIES TO TEST AGAINST: ${philosophies || 'All applicable philosophies'}`;
+    }
+    case 'ca': {
+      const facts = document.getElementById('ca-facts').value.trim();
+      if(!facts) return null;
+      const div = document.getElementById('ca-division').value;
+      const pos = document.getElementById('ca-position').value;
+      return `CASE FACTS:\n${facts}\n\nLAW DIVISION: ${div}\nCLIENT POSITION: ${pos}`;
+    }
+    case 'st': {
+      const strategy = document.getElementById('st-strategy').value.trim();
+      if(!strategy) return null;
+      const opposing = document.getElementById('st-opposing').value.trim();
+      const outcome = document.getElementById('st-outcome').value.trim();
+      return `MY INTENDED STRATEGY:\n${strategy}\n\nOPPOSING COUNSEL'S EXPECTED STRATEGY:\n${opposing || 'Unknown'}\n\nDESIRED OUTCOME:\n${outcome || 'Favourable judgment'}`;
+    }
+    case 'mc': {
+      const statement = document.getElementById('mc-statement').value.trim();
+      if(!statement) return null;
+      const role = document.getElementById('mc-role').value;
+      const intensity = document.getElementById('mc-intensity').value;
+      return `MY ARGUMENT IN COURT:\n"${statement}"\n\nYOU ARE PLAYING: ${role}\nINTENSITY LEVEL: ${intensity}`;
+    }
+    case 'lf': {
+      const arg = document.getElementById('lf-argument').value.trim();
+      if(!arg) return null;
+      const depth = document.getElementById('lf-depth').value;
+      return `LEGAL ARGUMENT TO SCAN:\n"${arg}"\n\nSCAN DEPTH: ${depth}`;
+    }
+    case 'pd': {
+      const summary = document.getElementById('pd-summary').value.trim();
+      if(!summary) return null;
+      const type = document.getElementById('pd-type').value;
+      const court = document.getElementById('pd-court').value;
+      const parties = document.getElementById('pd-parties').value.trim();
+      return `CASE SUMMARY:\n${summary}\n\nPETITION TYPE: ${type}\nFILING COURT: ${court}\nPARTIES: ${parties || 'To be specified'}`;
+    }
+  }
+  return null;
+}
+
+async function runAgent(agentId) {
+  const userMsg = buildUserMessage(agentId);
+  const outputEl = document.getElementById(agentId + '-output');
+
+  if(!userMsg) {
+    showToast('Please fill in the required fields first.');
+    return;
+  }
+
+  const btn = document.querySelector(`#panel-${agentId} .run-btn`);
+  btn.disabled = true;
+
+  // Show typing indicator
+  outputEl.innerHTML = `
+    <div class="typing-block">
+      <div class="typing-dots"><span></span><span></span><span></span></div>
+      <div class="typing-label">${AGENTS[agentId].name} is analysing...</div>
+    </div>`;
+
+  try {
+    const agent = AGENTS[agentId];
+    const result = await callClaude(agent.system, userMsg);
+    const now = new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
+
+    outputEl.innerHTML = `
+      <div class="response-block">
+        <div class="response-meta">
+          <span class="response-agent-tag">⚡ ${agent.name}</span>
+          <span class="response-time">${now}</span>
+        </div>
+        <div class="response-content">${formatResponse(result)}</div>
+      </div>`;
+
+  } catch(err) {
+    outputEl.innerHTML = `
+      <div class="error-block">
+        <strong>Agent Error:</strong> ${err.message}<br><br>
+        To use the live AI agents, an Anthropic API key needs to be configured in the backend. The agents, system prompts, and full UI are ready — connect your API key to activate them.
+      </div>`;
+  }
+
+  btn.disabled = false;
+}
+
+function formatResponse(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^#{1,3} (.+)$/gm, '<strong style="font-size:1.05rem;color:var(--white);">$1</strong>')
+    .replace(/\n/g, '<br>');
+}
+
+function clearOutput(agentId) {
+  const icons = { ci:'⚖️', ca:'🔍', st:'♟️', mc:'🎭', lf:'🔬', pd:'📜' };
+  const labels = { ci:'Awaiting Constitutional Analysis', ca:'Awaiting Case Analysis', st:'Awaiting Strategy Simulation', mc:'Court Session Not Yet Started', lf:'Awaiting Fallacy Scan', pd:'Awaiting Petition Draft' };
+  document.getElementById(agentId + '-output').innerHTML = `
+    <div class="response-empty">
+      <div class="response-empty-icon">${icons[agentId]}</div>
+      <div class="response-empty-text">${labels[agentId]}</div>
+    </div>`;
+}
+
+function copyOutput(agentId) {
+  const el = document.getElementById(agentId + '-output');
+  const text = el.innerText.replace(/\n\n+/g,'\n\n').trim();
+  navigator.clipboard.writeText(text).then(() => showToast('Output copied to clipboard'));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
